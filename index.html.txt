@@ -209,7 +209,7 @@
                             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                                 <i class="fa-solid fa-lock"></i>
                             </span>
-                            <input type="password" id="signupPassword" required placeholder="••••••••••••"
+                            <input type="password" id="signupPassword" required placeholder="Â•Â•Â•Â•Â•Â•Â•Â•Â•Â•Â•Â•"
                                 class="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderRed-500 focus:ring-1 focus:ring-spiderRed-500 transition-all text-sm">
                         </div>
                     </div>
@@ -527,7 +527,7 @@
             </div>
             <div class="flex items-center gap-4 text-slate-400">
                 <span class="text-spiderRed-500 font-semibold">Theme: Red + White + Blue</span>
-                <span>•</span>
+                <span>Â•</span>
                 <span class="text-spiderBlue-400">Vercel Ready static web application</span>
             </div>
         </div>
