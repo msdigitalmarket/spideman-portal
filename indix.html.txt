@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Webworks | Spider-Man Portal</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spiderRed: {
+                            400: '#ef4444',
+                            500: '#dc2626',
+                            600: '#b91c1c',
+                            700: '#991b1b',
+                            glow: '#ff1a1a'
+                        },
+                        spiderBlue: {
+                            400: '#38bdf8',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            800: '#1e3a8a',
+                            900: '#0f172a'
+                        },
+                        heroDark: '#060911',
+                        cardDark: '#0d1322'
+                    },
+                    fontFamily: {
+                        heading: ['Montserrat', 'sans-serif'],
+                        body: ['Outfit', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'spider-red': '0 0 25px -5px rgba(220, 38, 38, 0.5), 0 0 10px -5px rgba(220, 38, 38, 0.3)',
+                        'spider-blue': '0 0 25px -5px rgba(2, 132, 199, 0.5), 0 0 10px -5px rgba(2, 132, 199, 0.3)',
+                        'glow': '0 0 30px rgba(239, 68, 68, 0.6)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #060911;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Spider-Man background theme overlay */
+        .spider-bg-pattern {
+            background-color: #060911;
+            background-image: 
+                radial-gradient(circle at 50% 30%, rgba(220, 38, 38, 0.18) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(2, 132, 199, 0.18) 0%, transparent 50%),
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 35px 35px, 35px 35px;
+        }
+
+        /* Hero Text Spidey Color Gradient: Red + White + Blue */
+        .text-gradient-spidey {
+            background: linear-gradient(135deg, #ffffff 0%, #fca5a5 35%, #ef4444 70%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060911;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0284c7;
+        }
+
+        /* Interactive Web Canvas */
+        #webCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.45;
+        }
+    </style>
+</head>
+<body class="spider-bg-pattern min-h-screen flex flex-col selection:bg-spiderRed-500 selection:text-white relative">
+
+    <!-- Interactive Canvas for Web Particles -->
+    <canvas id="webCanvas"></canvas>
+
+    <header class="sticky top-0 z-50 backdrop-blur-lg bg-slate-950/90 border-b border-red-900/40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo Apex Webworks -->
+            <a href="#" onclick="switchView('signup')" class="flex items-center gap-3 group">
+                <div class="relative w-11 h-11 bg-slate-900 border-2 border-spiderRed-500 rounded-2xl p-1 shadow-spider-red transition-transform duration-300 group-hover:scale-105 flex items-center justify-center overflow-hidden">
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <polygon points="50,10 90,85 70,85 50,45 30,85 10,85" fill="#38bdf8" />
+                        <path d="M 35 60 L 50 25 L 65 60 Z" fill="#dc2626" />
+                        <text x="50" y="93" font-size="16" font-weight="900" text-anchor="middle" fill="#ffffff" font-family="Montserrat">APEX</text>
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-heading font-extrabold text-xl sm:text-2xl tracking-wider text-white flex items-center gap-1">
+                        APEX <span class="text-spiderRed-500">WEBWORKS</span>
+                    </span>
+                    <span class="text-[10px] text-spiderBlue-400 tracking-widest uppercase font-bold">Spider-Man Portal</span>
+                </div>
+            </a>
+
+            <!-- Navigation Tabs (User Portal vs Admin Portal) -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="navUserTab" onclick="switchView('signup')" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-spiderRed-600 text-white shadow-spider-red">
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                    <span>User Portal</span>
+                </button>
+
+                <button id="navAdminTab" onclick="switchView('admin-login')" class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-slate-900 text-slate-300 border border-slate-700 hover:border-spiderBlue-500 hover:text-white">
+                    <i class="fa-solid fa-lock text-xs text-spiderBlue-400"></i>
+                    <span>Admin Portal</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="flex-grow relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col justify-center">
+
+        <section id="viewSignup" class="view-section block max-w-lg mx-auto w-full">
+            <div class="relative bg-slate-900/90 border border-spiderRed-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl overflow-hidden">
+                
+                <!-- Glowing corner accents -->
+                <div class="absolute -top-16 -right-16 w-36 h-36 bg-spiderRed-600/20 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-spiderBlue-600/20 rounded-full blur-2xl"></div>
+
+                <!-- Form Header -->
+                <div class="text-center mb-8 relative">
+                    <div class="inline-flex p-3.5 rounded-2xl bg-gradient-to-tr from-spiderRed-600 to-spiderBlue-600 mb-4 shadow-spider-red">
+                        <i class="fa-solid fa-user-plus text-3xl text-white"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white tracking-wide uppercase">
+                        User <span class="text-spiderRed-500">Sign Up</span>
+                    </h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-2">
+                        Sign up below to register your account and open the Spider-Man Hero Section.
+                    </p>
+                </div>
+
+                <!-- Sign Up Form -->
+                <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-4 relative">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                            Full Name <span class="text-spiderRed-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="signupName" required placeholder="Peter Parker"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderRed-500 focus:ring-1 focus:ring-spiderRed-500 transition-all text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                            Email Address <span class="text-spiderRed-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-envelope"></i>
+                            </span>
+                            <input type="email" id="signupEmail" required placeholder="peter.parker@dailybugle.com"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderRed-500 focus:ring-1 focus:ring-spiderRed-500 transition-all text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                            Password <span class="text-spiderRed-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="signupPassword" required placeholder="••••••••••••"
+                                class="w-full pl-10 pr-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderRed-500 focus:ring-1 focus:ring-spiderRed-500 transition-all text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Terms agreement checkbox -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="termsCheck" required class="w-4 h-4 accent-spiderRed-600 rounded border-slate-800 bg-slate-950">
+                        <label for="termsCheck" class="text-xs text-slate-400">
+                            I agree to register with Apex Webworks Spider-Man Portal.
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-spiderRed-600 via-spiderRed-500 to-spiderBlue-600 text-white font-bold text-sm tracking-wide uppercase hover:from-spiderRed-500 hover:to-spiderBlue-500 transition-all duration-300 shadow-spider-red flex items-center justify-center gap-2 group mt-6">
+                        <span>Sign Up & View Hero Section</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+
+                <!-- Admin Sign In Link -->
+                <div class="mt-6 text-center pt-5 border-t border-slate-800/80">
+                    <p class="text-xs text-slate-400">
+                        Are you an Administrator?
+                        <button onclick="switchView('admin-login')" class="text-spiderBlue-400 hover:text-white font-bold underline underline-offset-4 ml-1">
+                            Sign In Here
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="viewHero" class="view-section hidden">
+            <div class="bg-slate-900/90 border border-spiderRed-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                
+                <!-- Glow Accents -->
+                <div class="absolute top-0 right-0 w-96 h-96 bg-spiderRed-600/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-96 h-96 bg-spiderBlue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left Column: Spider-Man Image Frame with Robust Vercel Fallbacks -->
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="relative group max-w-sm w-full">
+                            <!-- Outer Web Glow frame -->
+                            <div class="absolute -inset-1.5 bg-gradient-to-r from-spiderRed-600 via-white to-spiderBlue-600 rounded-3xl blur opacity-80 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                            
+                            <!-- Image Container -->
+                            <div class="relative bg-black rounded-2xl overflow-hidden border-2 border-spiderRed-500/80 shadow-spider-red flex items-center justify-center min-h-[380px]">
+                                
+                                <!-- Spider-Man Image with multiple fallbacks for Vercel static deployment -->
+                                <img id="spidermanImg" 
+                                     src="spiderman.jpg" 
+                                     onerror="handleImageFallback(this)"
+                                     alt="Spider-Man Suit" 
+                                     class="w-full h-80 sm:h-96 object-cover object-top transition-transform duration-700 group-hover:scale-105">
+
+                                <!-- Badge on image -->
+                                <div class="absolute top-4 left-4 bg-slate-950/90 backdrop-blur-md border border-spiderRed-500/80 px-3 py-1 rounded-full text-xs font-bold text-spiderRed-400 flex items-center gap-1.5 shadow-lg">
+                                    <i class="fa-solid fa-spider text-spiderRed-500"></i> spiderman.jpg
+                                </div>
+
+                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 text-center">
+                                    <span class="text-xs uppercase tracking-widest text-white font-black">Apex Webworks Hero Section</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Direct File Loader for local testing or custom image upload -->
+                        <div class="mt-4 w-full max-w-sm flex items-center justify-between bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl">
+                            <span class="text-xs text-slate-400 font-medium pl-1">Choose custom image:</span>
+                            <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-spiderRed-600 hover:bg-spiderRed-500 text-white text-xs font-bold shadow transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-upload"></i> Browse Image
+                                <input type="file" id="imageUploader" accept="image/*" onchange="uploadLocalImage(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Mandatory Heading & Content -->
+                    <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                        
+                        <!-- Status Badge -->
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-spiderRed-950/80 border border-spiderRed-500/60 text-spiderRed-400 text-xs font-bold tracking-widest uppercase shadow-md">
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i> Connection Established
+                        </div>
+
+                        <!-- MANDATORY HEADING strictly as requested -->
+                        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white uppercase leading-tight">
+                            <span class="text-gradient-spidey">thank you for connecting.</span>
+                        </h1>
+
+                        <!-- Dynamic Personalized Message -->
+                        <div class="p-5 rounded-2xl bg-slate-950/90 border border-slate-800 text-slate-300 text-sm sm:text-base leading-relaxed shadow-lg">
+                            <p id="heroUserGreeting">
+                                Welcome! Your email registration has been saved to the database and sent directly to the <strong class="text-spiderBlue-400">Admin Portal</strong>.
+                            </p>
+                        </div>
+
+                        <!-- Highlights Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left pt-2">
+                            <div class="p-4 rounded-xl bg-slate-950/80 border border-spiderRed-500/40">
+                                <div class="w-8 h-8 rounded-lg bg-spiderRed-600/30 flex items-center justify-center text-spiderRed-500 mb-2">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-sm">Real-Time Sync</h4>
+                                <p class="text-xs text-slate-400 mt-1">Sign up timestamp and email ID logged live for Admin access.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-slate-950/80 border border-spiderBlue-500/40">
+                                <div class="w-8 h-8 rounded-lg bg-spiderBlue-600/30 flex items-center justify-center text-spiderBlue-400 mb-2">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <h4 class="font-bold text-white text-sm">Red + White + Blue Theme</h4>
+                                <p class="text-xs text-slate-400 mt-1">Custom designed Spider-Man portal by Apex Webworks.</p>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Web Shooter Buttons -->
+                        <div class="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                            <button onclick="triggerWebEffect()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-spiderRed-600 via-spiderRed-500 to-spiderBlue-600 text-white font-bold text-sm tracking-wide uppercase hover:brightness-110 transition-all shadow-spider-red flex items-center gap-2">
+                                <i class="fa-solid fa-spider"></i> Shoot Web Effect
+                            </button>
+                            <button onclick="switchView('admin-login')" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-bold text-sm hover:bg-slate-700 hover:text-white transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-lock text-spiderBlue-400"></i> Open Admin Sign In
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="viewAdminLogin" class="view-section hidden max-w-lg mx-auto w-full">
+            <div class="bg-slate-900/90 border border-spiderBlue-500/50 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                
+                <div class="text-center mb-6">
+                    <div class="relative w-20 h-20 mx-auto mb-3 rounded-2xl overflow-hidden border-2 border-spiderBlue-500 shadow-spider-blue">
+                        <img src="spiderman.jpg" 
+                             onerror="handleImageFallback(this)"
+                             alt="Spider-Man Admin" class="w-full h-full object-cover">
+                    </div>
+                    <h2 class="text-2xl font-black text-white uppercase tracking-wide">Admin Sign In</h2>
+                    <p class="text-xs text-slate-400 mt-1">Login to view all signed up user emails and timestamps.</p>
+                </div>
+
+                <!-- Admin Login Form -->
+                <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            Admin Email
+                        </label>
+                        <input type="email" id="adminEmail" required value="admin@apex.com"
+                            class="w-full px-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderBlue-500 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                            Password
+                        </label>
+                        <input type="password" id="adminPassword" required value="admin123"
+                            class="w-full px-4 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-spiderBlue-500 text-sm">
+                    </div>
+
+                    <!-- Auto-fill helper for demonstration -->
+                    <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                        <span>Demo Admin Credentials:</span>
+                        <button type="button" onclick="autoFillAdmin()" class="text-spiderBlue-400 font-bold hover:underline">
+                            Auto-fill
+                        </button>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-spiderBlue-600 text-white font-bold text-sm tracking-wide uppercase hover:bg-spiderBlue-500 transition-all shadow-spider-blue flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login to Admin Portal
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section id="viewAdminDashboard" class="view-section hidden space-y-6">
+            
+            <!-- Dashboard Top Header Bar -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-2xl backdrop-blur-xl">
+                <div class="flex items-center gap-4">
+                    <img src="spiderman.jpg" 
+                         onerror="handleImageFallback(this)"
+                         alt="Spider-Man Mini" class="w-12 h-12 rounded-xl border border-spiderRed-500 object-cover shadow-spider-red">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-2xl font-black text-white uppercase tracking-wide">
+                                Admin <span class="text-spiderBlue-400">Portal</span>
+                            </h2>
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                                Live Database Connected
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Viewing registered users, Email IDs, and exact sign-up timestamps.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Admin Quick Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="switchView('hero')" class="px-4 py-2 rounded-xl bg-spiderRed-600 hover:bg-spiderRed-500 text-white text-xs font-bold shadow-spider-red transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-eye"></i> View Hero Page
+                    </button>
+                    <button onclick="exportToCSV()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Export CSV
+                    </button>
+                    <button onclick="clearAllUsers()" class="px-4 py-2 rounded-xl bg-spiderRed-950/60 hover:bg-spiderRed-900 text-spiderRed-400 text-xs font-bold border border-spiderRed-800/60 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-trash"></i> Reset Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metric Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                <!-- Card 1: Total Signups -->
+                <div class="bg-slate-900/80 border border-spiderRed-500/40 p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Registered Users</p>
+                            <h3 id="dashTotalUsers" class="text-3xl font-black text-white mt-1">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-spiderRed-600/20 text-spiderRed-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-500">Live updated on every sign up</div>
+                </div>
+
+                <!-- Card 2: Latest Registration -->
+                <div class="bg-slate-900/80 border border-spiderBlue-500/40 p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Latest Signed Up Email</p>
+                            <h3 id="dashLatestUser" class="text-sm font-bold text-spiderBlue-400 mt-1 truncate max-w-[180px]">None</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-spiderBlue-600/20 text-spiderBlue-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                    </div>
+                    <div id="dashLatestDate" class="mt-3 text-[11px] text-slate-500">No registrations yet</div>
+                </div>
+
+                <!-- Card 3: Color Theme Status -->
+                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Theme Palette</p>
+                            <h3 class="text-sm font-bold text-white mt-1">Red + White + Blue</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-emerald-400 font-medium">Apex Webworks Official Design</div>
+                </div>
+
+            </div>
+
+            <!-- User Data Table -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden backdrop-blur-xl">
+                
+                <!-- Table Header & Search Bar -->
+                <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-spiderRed-500"></i> Signed Up Users Directory
+                    </h3>
+                    <div class="relative w-full sm:w-64">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 text-xs">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchInput" oninput="renderUserTable()" placeholder="Search by email or name..."
+                            class="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-spiderBlue-500">
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-950/90 text-slate-400 font-bold uppercase text-[11px] tracking-wider border-b border-slate-800">
+                                <th class="py-3.5 px-4">#</th>
+                                <th class="py-3.5 px-4">Full Name</th>
+                                <th class="py-3.5 px-4">User Email ID</th>
+                                <th class="py-3.5 px-4">Sign Up Date & Time</th>
+                                <th class="py-3.5 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+                            <!-- Dynamic User Rows Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty state placeholder -->
+                <div id="emptyTableState" class="hidden py-12 text-center">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-700 mb-3"></i>
+                    <p class="text-sm text-slate-400">No registered users found in database.</p>
+                    <button onclick="switchView('signup')" class="mt-3 px-4 py-1.5 rounded-lg bg-spiderRed-600 text-white text-xs font-bold hover:bg-spiderRed-500">
+                        Create User Sign Up
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="relative z-10 bg-slate-950/90 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-white">Apex Webworks</span> &copy; 2026. Spider-Man Portal Project.
+            </div>
+            <div class="flex items-center gap-4 text-slate-400">
+                <span class="text-spiderRed-500 font-semibold">Theme: Red + White + Blue</span>
+                <span>•</span>
+                <span class="text-spiderBlue-400">Vercel Ready static web application</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // High quality fallback URLs for live hosting environments (Vercel, GitHub Pages)
+        const fallbackImageUrls = [
+            'https://images.unsplash.com/photo-1635863138275-d9b33299680b?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=1000&q=80'
+        ];
+
+        function handleImageFallback(imgElement) {
+            imgElement.onerror = null; // Prevent infinite loop
+            imgElement.src = fallbackImageUrls[0];
+        }
+
+        // Default Mock Data for Demonstration
+        const defaultUsers = [
+            {
+                id: 'usr_1',
+                name: 'Peter Parker',
+                email: 'peter.parker@dailybugle.com',
+                date: '2026-09-29 14:30:12'
+            },
+            {
+                id: 'usr_2',
+                name: 'Gwen Stacy',
+                email: 'gwen.stacy@oscorp.io',
+                date: '2026-09-29 15:45:00'
+            },
+            {
+                id: 'usr_3',
+                name: 'Miles Morales',
+                email: 'miles.morales@brooklyntech.edu',
+                date: '2026-09-29 16:10:22'
+            }
+        ];
+
+        // Retrieve or initialize users database in LocalStorage
+        function getUsersDB() {
+            try {
+                const data = localStorage.getItem('apex_spidey_users');
+                if (!data) {
+                    localStorage.setItem('apex_spidey_users', JSON.stringify(defaultUsers));
+                    return defaultUsers;
+                }
+                return JSON.parse(data);
+            } catch (e) {
+                return defaultUsers;
+            }
+        }
+
+        function saveUsersDB(users) {
+            try {
+                localStorage.setItem('apex_spidey_users', JSON.stringify(users));
+            } catch (e) {
+                console.error('LocalStorage write error:', e);
+            }
+            updateMetrics();
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+
+            const navUserTab = document.getElementById('navUserTab');
+            const navAdminTab = document.getElementById('navAdminTab');
+
+            if (navUserTab) navUserTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-slate-900 text-slate-300 border border-slate-700 hover:border-spiderRed-500 hover:text-white";
+            if (navAdminTab) navAdminTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-slate-900 text-slate-300 border border-slate-700 hover:border-spiderBlue-500 hover:text-white";
+
+            if (viewName === 'signup') {
+                document.getElementById('viewSignup').classList.remove('hidden');
+                if (navUserTab) navUserTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-spiderRed-600 text-white shadow-spider-red";
+            } else if (viewName === 'hero') {
+                document.getElementById('viewHero').classList.remove('hidden');
+                if (navUserTab) navUserTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-spiderRed-600 text-white shadow-spider-red";
+            } else if (viewName === 'admin-login') {
+                document.getElementById('viewAdminLogin').classList.remove('hidden');
+                if (navAdminTab) navAdminTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-spiderBlue-600 text-white shadow-spider-blue";
+            } else if (viewName === 'admin-dashboard') {
+                document.getElementById('viewAdminDashboard').classList.remove('hidden');
+                if (navAdminTab) navAdminTab.className = "px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 flex items-center gap-2 bg-spiderBlue-600 text-white shadow-spider-blue";
+                renderUserTable();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Handle User Sign Up -> Redirects straight to Hero Page
+        function handleSignup(event) {
+            event.preventDefault();
+
+            const nameInput = document.getElementById('signupName').value.trim();
+            const emailInput = document.getElementById('signupEmail').value.trim();
+            const passInput = document.getElementById('signupPassword').value.trim();
+
+            if (!nameInput || !emailInput || !passInput) {
+                showToast('Please fill out all mandatory fields.', 'error');
+                return;
+            }
+
+            const users = getUsersDB();
+
+            const now = new Date();
+            const formattedDate = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0') + ':' +
+                String(now.getSeconds()).padStart(2, '0');
+
+            const existing = users.find(u => u.email.toLowerCase() === emailInput.toLowerCase());
+            if (!existing) {
+                const newUser = {
+                    id: 'usr_' + Date.now(),
+                    name: nameInput,
+                    email: emailInput,
+                    date: formattedDate
+                };
+                users.unshift(newUser);
+                saveUsersDB(users);
+                showToast('Sign up successful! Welcome aboard.', 'success');
+            } else {
+                showToast('Welcome back! Directing to Hero Section.', 'info');
+            }
+
+            document.getElementById('heroUserGreeting').innerHTML = 
+                `Hello <strong class="text-spiderRed-400 font-bold">${escapeHTML(nameInput)}</strong> (<span class="text-spiderBlue-400 font-medium">${escapeHTML(emailInput)}</span>)! Your connection profile has been recorded in the database and is now live in the Admin Portal.`;
+
+            document.getElementById('signupForm').reset();
+            switchView('hero');
+        }
+
+        // Handle Admin Login -> Directs to Admin Portal
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('adminEmail').value.trim();
+            const pass = document.getElementById('adminPassword').value.trim();
+
+            if (email === 'admin@apex.com' && pass === 'admin123') {
+                showToast('Admin access granted! Redirecting...', 'success');
+                switchView('admin-dashboard');
+            } else {
+                showToast('Invalid admin credentials. Use admin@apex.com / admin123', 'error');
+            }
+        }
+
+        function autoFillAdmin() {
+            document.getElementById('adminEmail').value = 'admin@apex.com';
+            document.getElementById('adminPassword').value = 'admin123';
+        }
+
+        function renderUserTable() {
+            const users = getUsersDB();
+            const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            const tbody = document.getElementById('userTableBody');
+            const emptyState = document.getElementById('emptyTableState');
+
+            if (!tbody) return;
+
+            const filtered = users.filter(u => 
+                u.name.toLowerCase().includes(searchVal) || 
+                u.email.toLowerCase().includes(searchVal)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                tbody.innerHTML = filtered.map((u, index) => `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="py-3.5 px-4 font-mono text-slate-500">${index + 1}</td>
+                        <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-spiderRed-600 to-spiderBlue-600 flex items-center justify-center text-[10px] text-white">
+                                ${escapeHTML(u.name.charAt(0).toUpperCase())}
+                            </div>
+                            <span>${escapeHTML(u.name)}</span>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono text-spiderBlue-400 font-medium">${escapeHTML(u.email)}</td>
+                        <td class="py-3.5 px-4 font-mono text-slate-300 text-xs">${escapeHTML(u.date)}</td>
+                        <td class="py-3.5 px-4 text-right">
+                            <button onclick="deleteUser('${u.id}')" title="Delete User" class="p-1.5 rounded-lg text-slate-500 hover:text-spiderRed-400 hover:bg-spiderRed-950/50 transition-all">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            updateMetrics();
+        }
+
+        function deleteUser(userId) {
+            let users = getUsersDB();
+            users = users.filter(u => u.id !== userId);
+            saveUsersDB(users);
+            renderUserTable();
+            showToast('User deleted from Admin database.', 'info');
+        }
+
+        function clearAllUsers() {
+            saveUsersDB([]);
+            renderUserTable();
+            showToast('All user data cleared.', 'info');
+        }
+
+        function exportToCSV() {
+            const users = getUsersDB();
+            if (users.length === 0) {
+                showToast('No user data to export!', 'error');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,ID,Name,Email,Signup_Date\n";
+            users.forEach(u => {
+                csvContent += `"${u.id}","${u.name}","${u.email}","${u.date}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Apex_Spiderman_Users_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('CSV Export downloaded successfully.', 'success');
+        }
+
+        function updateMetrics() {
+            const users = getUsersDB();
+
+            const dashTotal = document.getElementById('dashTotalUsers');
+            if (dashTotal) dashTotal.textContent = users.length;
+
+            const dashLatestUser = document.getElementById('dashLatestUser');
+            const dashLatestDate = document.getElementById('dashLatestDate');
+
+            if (users.length > 0) {
+                if (dashLatestUser) dashLatestUser.textContent = users[0].email;
+                if (dashLatestDate) dashLatestDate.textContent = 'Registered: ' + users[0].date;
+            } else {
+                if (dashLatestUser) dashLatestUser.textContent = 'None';
+                if (dashLatestDate) dashLatestDate.textContent = 'No records found';
+            }
+        }
+
+        function triggerWebEffect() {
+            showToast('??? Web effect dispatched across network!', 'success');
+            
+            for (let i = 0; i < 12; i++) {
+                const web = document.createElement('div');
+                web.className = 'fixed text-spiderRed-500 pointer-events-none z-50 text-2xl transition-all duration-1000';
+                web.innerHTML = '<i class="fa-solid fa-spider"></i>';
+                web.style.left = Math.random() * 100 + 'vw';
+                web.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(web);
+
+                setTimeout(() => {
+                    web.style.transform = `scale(2.5) rotate(${Math.random() * 360}deg)`;
+                    web.style.opacity = '0';
+                }, 50);
+
+                setTimeout(() => web.remove(), 1100);
+            }
+        }
+
+        function uploadLocalImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('spidermanImg');
+                    if (img) {
+                        img.src = e.target.result;
+                        showToast('Image updated successfully to ' + file.name, 'success');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const existing = document.getElementById('apexToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'apexToast';
+            
+            let bgStyle = 'bg-slate-900 border-spiderBlue-500 text-white';
+            let icon = '<i class="fa-solid fa-circle-info text-spiderBlue-400"></i>';
+
+            if (type === 'success') {
+                bgStyle = 'bg-slate-900 border-emerald-500 text-white';
+                icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+            } else if (type === 'error') {
+                bgStyle = 'bg-slate-900 border-spiderRed-500 text-white';
+                icon = '<i class="fa-solid fa-triangle-exclamation text-spiderRed-500"></i>';
+            }
+
+            toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-xl border shadow-2xl flex items-center gap-3 text-sm font-medium transition-all duration-300 transform translate-y-0 ${bgStyle}`;
+            toast.innerHTML = `${icon} <span>${escapeHTML(message)}</span>`;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function initWebCanvas() {
+            const canvas = document.getElementById('webCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const points = [];
+            const numPoints = 25;
+
+            for (let i = 0; i < numPoints; i++) {
+                points.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.8,
+                    vy: (Math.random() - 0.5) * 0.8,
+                    radius: Math.random() * 2 + 1
+                });
+            }
+
+            function drawWeb() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < points.length; i++) {
+                    let p1 = points[i];
+                    p1.x += p1.vx;
+                    p1.y += p1.vy;
+
+                    if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+                    if (p1.y < 0 || p1.y > canvas.height) p1.vx *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = i % 2 === 0 ? '#ef4444' : '#0284c7';
+                    ctx.fill();
+
+                    for (let j = i + 1; j < points.length; j++) {
+                        let p2 = points[j];
+                        let dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+                        if (dist < 180) {
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(220, 38, 38, ${1 - dist / 180})`;
+                            ctx.lineWidth = 0.6;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(drawWeb);
+            }
+
+            drawWeb();
+        }
+
+        window.onload = function() {
+            initWebCanvas();
+            updateMetrics();
+            switchView('signup');
+        };
+    </script>
+</body>
+</html>
